@@ -14,7 +14,7 @@ public class Translator {
     private ArrayList<String> separator (String formula){
 
         //Array that receiveis formula organized/divided.
-        ArrayList<String> formulaOrganized = new ArrayList<String>();
+        ArrayList<String> organizedFormula = new ArrayList<String>();
 
         //Formula without blank spaces.
         StringBuilder processedFormula = new StringBuilder(formula);
@@ -41,17 +41,16 @@ public class Translator {
 
             //Carries a possible operator.
             if(i < processedFormula.length() - 2) {
-                System.out.println(i);
                  carrier = Character.toString(processedFormula.charAt(i)) + Character.toString(processedFormula.charAt(i + 1)) + Character.toString(processedFormula.charAt(i + 2));
             }
 
 
             if(carrier.charAt(1) == 'O' && carrier.charAt(2) == 'R'){
-                System.out.println("first " + carrier);
-                formulaOrganized.add(Character.toString(processedFormula.charAt(i)));
+
+                organizedFormula.add(Character.toString(processedFormula.charAt(i)));
                 carrier = Character.toString(processedFormula.charAt(i + 1)) + Character.toString(processedFormula.charAt(i + 2));
+
                 operator = carrier;
-                System.out.println(carrier);
                 onOperator = true;
             }
             else if(carrier.equals(AND) || carrier.equals(NOT) || carrier.equals(IMP) ){
@@ -63,16 +62,16 @@ public class Translator {
             }
 
             if(onOperator){
-                formulaOrganized.add(operator);
+                organizedFormula.add(operator);
 
             } else if(Pattern.matches("[a-z]", Character.toString(processedFormula.charAt(i))) || processedFormula.charAt(i) == '(' || processedFormula.charAt(i) == ')'){
 
-                formulaOrganized.add(Character.toString(processedFormula.charAt(i)));
+                organizedFormula.add(Character.toString(processedFormula.charAt(i)));
             }
         }
 
 
-        return formulaOrganized;
+        return organizedFormula;
     }
 
     //Metodo para validar o input do usuario.
@@ -119,23 +118,23 @@ public class Translator {
 
     private int findLastParenthesis(ArrayList<String> processedFormula){
         int i = 0;
-        int indexOfLastParenthesis = 0;
+        int lastParenthesisIndex = 0;
 
         for(String element : processedFormula) {
             if (element.equals("(")) {
-                indexOfLastParenthesis = i;
+                lastParenthesisIndex = i;
             }
             i++;
         }
         //System.out.println(i);
         System.out.println(processedFormula);
-        return indexOfLastParenthesis;
+        return lastParenthesisIndex;
     }
 
     //Metodo para ler a formula do usuario e retornala traduzida para outro metodo que vai precessala.
-    public ArrayList<String> organizer(String formula){
+    private ArrayList<String> organizerSubFormula(ArrayList<String> processedSubformula){
 
-        ArrayList<String> processedFormula = separator(formula);
+        ArrayList<String> processedFormula = processedSubformula;
 
         //Armazena as operações em ordem de precedencia para serem processadas.
         ArrayList<String> orderedFormula = new ArrayList<>();
@@ -145,7 +144,7 @@ public class Translator {
         String operator = new String();
 
         //Contador para o while.
-        int i = findLastParenthesis(processedFormula);
+        int i = 0;
 
         //Numero de operações na formula.
         int numberOfOperations = 0;
@@ -160,9 +159,7 @@ public class Translator {
 
         while(processedFormula.contains(NOT) || processedFormula.contains(AND) || processedFormula.contains(OR) || processedFormula.contains(IMP)) {
 
-            if(processedFormula.get(i).equals(")")){
-                i = findLastParenthesis(processedFormula);
-            };
+            System.out.println(i);
 
             if (processedFormula.get(i).equals(AND) || processedFormula.get(i).equals(OR) || processedFormula.get(i).equals(NOT) || processedFormula.get(i).equals(IMP)) {
                 onOperator = true;
@@ -173,100 +170,147 @@ public class Translator {
 
 
             //Filtro de precedencias, tira o operador de maior precedencia e coloca ele primeira no Array "orderedFormula" com as suas variaveis em sequencia.
-            if(operator.equals(NOT)){
+            if(onOperator){
+                if(operator.equals(NOT)){
 
-                orderedFormula.add(operator);
-                orderedFormula.add(processedFormula.get(i + 1));
-
-                processedFormula.remove(i);
-                processedFormula.remove(i + 1);
-
-                //É igualado i á 0 para a leitura começar do começo de novo, para não ouver gaps de leitura e operadores
-                //de mesma precedencia não serem ordenados um antes do outro.
-                i = 0;
-                //É negado se a "processedFormula" contain o operador "NOT", porque se "contains(NOT)" retornar "false"
-                //quer dizer que não tem mais operadores "NOT" (e negada retorna "true") podendo assim ser possivel
-                // adicionar o operador "AND" e obedecer a precedencia. (o mesmo segue para as outras condições)
-            } else if (operator.equals(AND) && !processedFormula.contains(NOT)){
-
-                //Adiciona o operador AND ao array "OrderedFormula" e suas variaveis.
-                orderedFormula.add(operator);
-
-                //Se o "i" for 0, quer dizer que o operador esta comparando o valor de outra operacao
-                //entao é adicionado a primeira variavel uma string sinalizando isso e logo depois a segunda.
-                //se "i" não igualar a 0
-                if(i == 0){
-
+                    orderedFormula.add(operator);
                     orderedFormula.add(processedFormula.get(i + 1));
-                    orderedFormula.add("CurrentValue");
 
-                    processedFormula.remove(i + 1);
-                } else {
+                    processedFormula.remove(i);
 
-                    orderedFormula.add(processedFormula.get(i - 1));
-                    orderedFormula.add(processedFormula.get(i + 1));
+                    //É igualado i á 0 para a leitura começar do começo de novo, para não ouver gaps de leitura e operadores
+                    //de mesma precedencia não serem ordenados um antes do outro.
+                    i = 0;
+                    //É negado se a "processedFormula" contain o operador "NOT", porque se "contains(NOT)" retornar "false"
+                    //quer dizer que não tem mais operadores "NOT" (e negada retorna "true") podendo assim ser possivel
+                    // adicionar o operador "AND" e obedecer a precedencia. (o mesmo segue para as outras condições)
+                } else if (operator.equals(AND) && !processedFormula.contains(NOT)){
+
+                    //Adiciona o operador AND ao array "OrderedFormula" e suas variaveis.
+                    orderedFormula.add(operator);
+
+                    //Se o "i" for 0, quer dizer que o operador esta comparando o valor de outra operacao
+                    //entao é adicionado a primeira variavel uma string sinalizando isso e logo depois a segunda.
+                    //se "i" não igualar a 0
+                    if(i == 0){
+
+                        orderedFormula.add(processedFormula.get(i + 1));
+                        orderedFormula.add("CurrentValue");
+
+                        processedFormula.remove(i + 1);
+
+                        i++;
+                    } else {
+
+                        orderedFormula.add(processedFormula.get(i - 1));
+                        orderedFormula.add(processedFormula.get(i + 1));
+
+                        processedFormula.remove(i + 1);
+                        processedFormula.remove(i - 1);
+                    }
 
                     processedFormula.remove(i - 1);
-                    processedFormula.remove(i + 1);
-                }
 
-                processedFormula.remove(i);
+                    i = 0;
 
-                i = 0;
+                } else if ( operator.equals(OR) && !processedFormula.contains(AND)){
 
-            } else if ( operator.equals(OR) && !processedFormula.contains(AND)){
+                    orderedFormula.add(operator);
 
-                orderedFormula.add(operator);
+                    if(i == 0){
 
-                if(i == 0){
+                        orderedFormula.add(processedFormula.get(i + 1));
+                        orderedFormula.add("CurrentValue");
 
-                    orderedFormula.add(processedFormula.get(i + 1));
-                    orderedFormula.add("CurrentValue");
+                        processedFormula.remove(i + 1);
 
-                    processedFormula.remove(i + 1);
-                } else {
+                        i++;
+                    } else {
 
-                    orderedFormula.add(processedFormula.get(i - 1));
-                    orderedFormula.add(processedFormula.get(i + 1));
+                        orderedFormula.add(processedFormula.get(i - 1));
+                        orderedFormula.add(processedFormula.get(i + 1));
 
-                    processedFormula.remove(i - 1);
-                    processedFormula.remove(i + 1);
-                }
-
-                processedFormula.remove(i);
-
-                i = 0;
-
-            } else if ( operator.equals(IMP) && !processedFormula.contains(OR)){
-
-                if(i == 0){
-
-                    orderedFormula.add(processedFormula.get(i + 1));
-                    orderedFormula.add("CurrentValue");
-
-                    processedFormula.remove(i + 1);
-                } else {
-
-                    orderedFormula.add(processedFormula.get(i - 1));
-                    orderedFormula.add(processedFormula.get(i + 1));
+                        processedFormula.remove(i + 1);
+                        processedFormula.remove(i - 1);
+                    }
 
                     processedFormula.remove(i - 1);
-                    processedFormula.remove(i + 1);
+
+                    i = 0;
+
+                } else if ( operator.equals(IMP) && !processedFormula.contains(OR)){
+
+                    if(i == 0){
+
+                        orderedFormula.add(processedFormula.get(i + 1));
+                        orderedFormula.add("CurrentValue");
+
+                        processedFormula.remove(i + 1);
+
+                        i++;
+                    } else {
+
+                        orderedFormula.add(processedFormula.get(i - 1));
+                        orderedFormula.add(processedFormula.get(i + 1));
+
+                        processedFormula.remove(i + 1);
+                        processedFormula.remove(i - 1);
+                    }
+
+                    processedFormula.remove(i - 1);
+
+                    i = 0;
                 }
-
-                processedFormula.remove(i);
-
-                i = 0;
-            }
-
-            if(i > processedFormula.size()){
-                i = 0;
             } else {
                 i++;
             }
+
+            System.out.println(operator);
+            System.out.println("processedFormula: " + processedFormula);
+            System.out.println(orderedFormula);
         }
 
         return orderedFormula;
     }
 
+    public ArrayList<String> organizer(String formula){
+
+        ArrayList<String> organizedFormula = new ArrayList<String>();
+
+        ArrayList<String> processedFormula = separator(formula);
+
+        ArrayList<String> subFormula = new ArrayList<String>();
+
+        ArrayList<String> organizedSubFormula = new ArrayList<String>();
+
+        int numberOfSubFormulas = 0;
+
+        for(String element : processedFormula){
+            if(element.equals("(")){
+                numberOfSubFormulas++;
+            }
+        }
+
+        System.out.println(numberOfSubFormulas);
+
+        for(int i = 0; i < numberOfSubFormulas; i++){
+            int lastParenthesis = findLastParenthesis(processedFormula);
+
+            for(int q = lastParenthesis + 1; !processedFormula.get(q).equals(")"); q++){
+                subFormula.add(processedFormula.get(q));
+            }
+
+            System.out.println("Subformula: " + subFormula);
+
+            organizedSubFormula = organizerSubFormula(subFormula);
+
+            for(String element : organizedSubFormula){
+                organizedFormula.add(element);
+            }
+        }
+
+
+
+        return organizedFormula;
+    }
 }

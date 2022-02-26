@@ -171,6 +171,9 @@ public class Translator {
 
             //Filtro de precedencias, tira o operador de maior precedencia e coloca ele primeira no Array "orderedFormula" com as suas variaveis em sequencia.
             if(onOperator){
+
+                System.out.println("Here1");
+
                 if(operator.equals(NOT)){
 
                     orderedFormula.add(operator);
@@ -200,7 +203,14 @@ public class Translator {
                         processedFormula.remove(i + 1);
 
                         i++;
-                    } else {
+                    } else if(i == processedFormula.size() - 1){
+
+                        orderedFormula.add(processedFormula.get(i - 1));
+                        orderedFormula.add("CurrentValue");
+
+                        processedFormula.remove(i - 1);
+                    }
+                    else {
 
                         orderedFormula.add(processedFormula.get(i - 1));
                         orderedFormula.add(processedFormula.get(i + 1));
@@ -225,6 +235,12 @@ public class Translator {
                         processedFormula.remove(i + 1);
 
                         i++;
+                    } else if(i == processedFormula.size() - 1){
+
+                        orderedFormula.add(processedFormula.get(i - 1));
+                        orderedFormula.add("CurrentValue");
+
+                        processedFormula.remove(i - 1);
                     } else {
 
                         orderedFormula.add(processedFormula.get(i - 1));
@@ -248,6 +264,12 @@ public class Translator {
                         processedFormula.remove(i + 1);
 
                         i++;
+                    } else if(i == processedFormula.size() - 1){
+
+                        orderedFormula.add(processedFormula.get(i - 1));
+                        orderedFormula.add("CurrentValue");
+
+                        processedFormula.remove(i - 1);
                     } else {
 
                         orderedFormula.add(processedFormula.get(i - 1));
@@ -260,6 +282,8 @@ public class Translator {
                     processedFormula.remove(i - 1);
 
                     i = 0;
+                } else {
+                    i++;
                 }
             } else {
                 i++;
@@ -295,10 +319,24 @@ public class Translator {
 
         for(int i = 0; i < numberOfSubFormulas; i++){
             int lastParenthesis = findLastParenthesis(processedFormula);
+            int lastEndParenthesis = 0;
 
             for(int q = lastParenthesis + 1; !processedFormula.get(q).equals(")"); q++){
                 subFormula.add(processedFormula.get(q));
+                lastEndParenthesis = q;
+
             }
+
+            for(int q = lastParenthesis + 1; !processedFormula.get(q).equals(")"); q++){
+                System.out.println("Before removing: " + processedFormula.get(q));
+                processedFormula.remove(q);
+
+            }
+
+            processedFormula.remove(lastParenthesis + 1);
+            processedFormula.remove(lastParenthesis);
+
+            System.out.println(processedFormula);
 
             System.out.println("Subformula: " + subFormula);
 
@@ -309,6 +347,9 @@ public class Translator {
             }
         }
 
+        if(numberOfSubFormulas == 0){
+
+        }
 
 
         return organizedFormula;
